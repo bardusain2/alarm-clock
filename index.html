@@ -8,8 +8,7 @@
 </head>
 <body>
   <canvas id="myCanvas" style="
-    transform: scale(10);
-    transform-origin: top left;
+    width: 22mm;
     image-rendering: pixelated;
 "></canvas>
   <script>
@@ -653,17 +652,20 @@ function ui() {
 
 const shield = {
 data: [
-0x7e, 0xe7, 0xe7, 0x81, 0x81, 0xe7, 0x66, 0x3c, 0x18
+0x1f, 0xc0, 0x7f, 0xf0, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xc0, 0x18, 0xc0, 0x18, 0xc0, 0x18, 
+0xf8, 0xf8, 0x78, 0xf0, 0x38, 0xe0, 0x1f, 0xc0, 0x0f, 0x80, 0x07, 0x00
 ],
-width: 8,
-height: 9,
+width: 13,
+height: 14,
 }
 const bigCross = {
 data: [
-0x00, 0x18, 0x18, 0x7e, 0x7e, 0x18, 0x18, 0x00, 0x00
+0x00, 0x00, 0x00, 0x00, 
+0x07, 0x00, 0x07, 0x00, 0x07, 0x00, 0x3f, 0xe0, 0x3f, 0xe0, 0x3f, 0xe0, 0x07, 0x00, 0x07, 0x00, 
+0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 ],
-width: 8,
-height: 9,
+width: 13,
+height: 14,
 }
 const smallFlag = {
 data: [
@@ -681,9 +683,9 @@ height: 5,
 }
 const gfx = new AdafruitGFX('myCanvas', 128, 32);
 let selected = 0
-const menuItems =  ["A Alarm", "B Alarm", "C Alarm", "Pager", "Hymne", "Random"] //new Array(25).fill("").map((_, i) => i.toString(7)) //
+const menuItems =  ["A Alarm", "C Alarm", "Pager", "Hymne"] //new Array(25).fill("").map((_, i) => i.toString(7)) //
 const menuItemCount = menuItems.length;
-const menuItemsPerCol = 3
+const menuItemsPerCol = 2
 const selectedBitmap = shield
 const unselectedBitmap = bigCross
 function render() {
@@ -697,8 +699,8 @@ const bitmap = i === selected ? selectedBitmap : unselectedBitmap
 gfx.drawBitmap(x, y, bitmap.data, bitmap.width, bitmap.height, AdafruitGFX.WHITE);
     gfx.setCursor();
     gfx.setTextColor(gfx.WHITE);
-    gfx.setTextSize(10);
-    gfx.drawChar(x + bitmap.width + 2, y-1, menuItems[i], gfx.WHITE, undefined, Math.floor(gfx.height / menuItemsPerCol) + 1);
+    gfx.setTextSize(30);
+    gfx.drawChar(x + bitmap.width + 2, y-2, menuItems[i], gfx.WHITE, undefined, Math.floor(gfx.height / menuItemsPerCol) + 5);
 }
 }
 
