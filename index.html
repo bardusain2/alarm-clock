@@ -4,13 +4,16 @@
   <title>GFX 128x32</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Micro+5&display=swap" rel="stylesheet">
 </head>
 <body>
-  <canvas id="myCanvas" style="
+  <canvas id="canvas" style="
     width: 22mm;
     image-rendering: pixelated;
 "></canvas>
+  <select title="Demo selection" id="select">
+
+  </select>
+
   <script>
 class AdafruitGFX {
   constructor(canvasId, width = 128, height = 32) {
@@ -323,7 +326,7 @@ drawBitmap(x, y, bitmap, w, h, color) {
 
 // 1. Bouncing Ball Animation
 function bouncingBallDemo() {
-  const gfx = new AdafruitGFX('myCanvas', 128, 32);
+  const gfx = new AdafruitGFX('canvas', 128, 32);
   
   let x = 64;
   let y = 16;
@@ -367,7 +370,7 @@ function bouncingBallDemo() {
 
 // 2. Rotating Shapes Animation
 function rotatingShapesDemo() {
-  const gfx = new AdafruitGFX('myCanvas', 128, 32);
+  const gfx = new AdafruitGFX('canvas', 128, 32);
   
   let angle = 0;
   const centerX = 64;
@@ -401,18 +404,18 @@ function rotatingShapesDemo() {
 
 // 3. Scrolling Text Animation
 function scrollingTextDemo() {
-  const gfx = new AdafruitGFX('myCanvas', 128, 32);
+  const gfx = new AdafruitGFX('canvas', 128, 32);
   
   let scrollX = gfx.width;
   const message = 'Hello from Adafruit GFX!';
-  const messageWidth = message.length * 6; // 6 pixels per char
+  const messageWidth = message.length * 10; // 6 pixels per char
   
   gfx.startAnimation((timestamp) => {
     // Clear display
     gfx.clearDisplay();
     
     // Update scroll position
-    scrollX -= 1;
+    scrollX -= 0.4;
     if (scrollX < -messageWidth) {
       scrollX = gfx.width;
     }
@@ -421,7 +424,7 @@ function scrollingTextDemo() {
     gfx.setCursor(scrollX, 12);
     gfx.setTextColor(AdafruitGFX.GREEN);
     gfx.setTextSize(1);
-    gfx.print(message);
+    gfx.drawChar(scrollX, 5, message, AdafruitGFX.WHITE, undefined, 30);
     
     // Draw decorative lines
     gfx.drawFastHLine(0, 0, gfx.width, AdafruitGFX.RED);
@@ -433,7 +436,7 @@ function scrollingTextDemo() {
 
 // 4. Wave Pattern Animation
 function wavePatternDemo() {
-  const gfx = new AdafruitGFX('myCanvas', 128, 32);
+  const gfx = new AdafruitGFX('canvas', 128, 32);
   
   let phase = 0;
   
@@ -461,7 +464,7 @@ function wavePatternDemo() {
 
 // 5. Rainbow Color Cycle Animation
 function rainbowDemo() {
-  const gfx = new AdafruitGFX('myCanvas', 128, 32);
+  const gfx = new AdafruitGFX('canvas', 128, 32);
   
   let hue = 0;
   
@@ -511,7 +514,7 @@ function rainbowDemo() {
 
 // 6. Multi-Demo Showcase
 function showcaseDemo() {
-  const gfx = new AdafruitGFX('myCanvas', 128, 32);
+  const gfx = new AdafruitGFX('canvas', 128, 32);
   
   let frame = 0;
   
@@ -555,7 +558,7 @@ function showcaseDemo() {
 }
 
   function flag() {
-const gfx = new AdafruitGFX('myCanvas', 128, 32);
+const gfx = new AdafruitGFX('canvas', 128, 32);
   
   let frame = 0;
   
@@ -592,7 +595,7 @@ gfx.drawLine(2, 10, 2, 128, AdafruitGFX.WHITE);
 
 // Multiple sprites demo
 function spriteSheetDemo() {
-  const gfx = new AdafruitGFX('myCanvas', 32, 128);
+  const gfx = new AdafruitGFX('canvas', 32, 128);
   
   // Define multiple small sprites
   const heartBitmap = [
@@ -681,7 +684,7 @@ data: [
 width: 5,
 height: 5,
 }
-const gfx = new AdafruitGFX('myCanvas', 128, 32);
+const gfx = new AdafruitGFX('canvas', 128, 32);
 let selected = 0
 const menuItems =  ["A Alarm", "C Alarm", "Pager", "Hymne"] //new Array(25).fill("").map((_, i) => i.toString(7)) //
 const menuItemCount = menuItems.length;
@@ -704,6 +707,10 @@ gfx.drawBitmap(x, y, bitmap.data, bitmap.width, bitmap.height, AdafruitGFX.WHITE
 }
 }
 
+gfx.startAnimation(() => {
+  render()
+})
+
 render()
 
 document.addEventListener('keydown', (event) => {
@@ -724,14 +731,63 @@ default:
  return
 }
 selected = (selected + offset) % menuItemCount
+})
 
-render()
+gfx.canvas.addEventListener("click", () => {
+  selected = (selected + 1) % menuItemCount
 })
 
 }
 
-ui();
 
+
+function demoSelection() {
+  const select = document.getElementById("select");
+  const options = {
+    "Alarm UI": ui,
+    "Flagge": flag,
+    "Ball animation": bouncingBallDemo,
+    "Text animation": scrollingTextDemo,
+    "Regenbogen": rainbowDemo,
+  }
+
+  // Populate select
+  Object.keys(options).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+
+  // Run selected demo
+  function runSelected() {
+    const fn = options[select.value];
+    if (typeof fn === 'function') fn();
+  }
+
+  select.addEventListener('change', runSelected);
+
+  // Initial selection
+  if (select.options.length) {
+    select.selectedIndex = 0;
+    runSelected();
+  }
+}
+
+const fontFile = new FontFace(
+  "'Micro 5'",
+  'url("https://fonts.gstatic.com/s/micro5/v2/H4cnBX2MkcfEngTr4gEa7Q.woff2")',
+);
+document.fonts.add(fontFile);
+
+fontFile.load().then(
+  () => {
+    demoSelection();
+  },
+  (err) => {
+    console.error(err);
+  },
+);
 
 
   </script>
