@@ -38,6 +38,7 @@ class AdafruitGFX {
     // Animation properties
     this.animationRunning = false;
     this.animationId = null;
+    this.previousTimestamp = null;
     
     // Clear canvas
     this.clearDisplay();
@@ -305,10 +306,15 @@ drawBitmap(x, y, bitmap, w, h, color) {
     this.animationRunning = true;
     const animate = (timestamp) => {
       if (!this.animationRunning) return;
+      let delta = null;
+      if (this.previousTimestamp !== null) {
+        delta = timestamp - this.previousTimestamp
+      }
       
-      callback(timestamp);
+      callback(timestamp, delta);
       
       this.animationId = requestAnimationFrame(animate);
+      this.previousTimestamp = timestamp;
     };
     this.animationId = requestAnimationFrame(animate);
   }
@@ -334,13 +340,15 @@ function bouncingBallDemo() {
   let vy = 1.5;
   const radius = 4;
   
-  gfx.startAnimation((timestamp) => {
+  gfx.startAnimation((timestamp, delta) => {
     // Clear display
     gfx.clearDisplay();
+
+    delta /= 10;
     
     // Update position
-    x += vx;
-    y += vy;
+    x += delta * vx;
+    y += delta * vy;
     
     // Bounce off walls
     if (x - radius <= 0 || x + radius >= gfx.width) {
@@ -415,10 +423,7 @@ function scrollingTextDemo() {
     gfx.clearDisplay();
     
     // Update scroll position
-    scrollX -= 0.4;
-    if (scrollX < -messageWidth) {
-      scrollX = gfx.width;
-    }
+    scrollX = gfx.width - ((timestamp / 10) % (gfx.width + messageWidth))
     
     // Draw scrolling text
     gfx.setCursor(scrollX, 12);
@@ -493,7 +498,7 @@ function rainbowDemo() {
     // Clear display
     gfx.clearDisplay();
     
-    hue = (hue + 1) % 360;
+    hue = (timestamp / 5) % 360;
     
     // Draw rainbow bars
     for (let i = 0; i < 8; i++) {
@@ -564,8 +569,7 @@ const gfx = new AdafruitGFX('canvas', 128, 32);
   
   gfx.startAnimation((timestamp) => {
     gfx.clearDisplay();
-frame++;
-const t = frame / 60;
+const t = timestamp / 140;
 const amplitude = 1.25
 const speed = -1 / 2
 const frequency = 1 / 6
