@@ -250,7 +250,7 @@
 
           // Draw character
           this.ctx.fillStyle = this.colorToCSS(color);
-          this.ctx.font = `${size}px 'Micro 5'`;
+          this.ctx.font = `${size}px Micro5`;
           this.ctx.textBaseline = "top";
           this.ctx.fillText(c, x, y);
         }
@@ -846,7 +846,7 @@
       }
 
       const fontFile = new FontFace(
-        "'Micro 5'",
+        "Micro5",
         'url("https://fonts.gstatic.com/s/micro5/v2/H4cnBX2MkcfEngTr4gEa7Q.woff2")',
       );
       document.fonts.add(fontFile);
