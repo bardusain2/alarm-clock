@@ -738,27 +738,31 @@
           width: 5,
           height: 5,
         };
+        const arrow = {
+          data: [0x20, 0x20, 0x20, 0x20, 0x20, 0xa8, 0x70, 0x20],
+          width: 5,
+          height: 8,
+        }
         const gfx = new AdafruitGFX("canvas", 128, 32);
         let selected = 0;
-        const menuItems = ["A Alarm", "C Alarm", "Pager", "Hymne"]; //new Array(25).fill("").map((_, i) => i.toString(7)) //
+        const menuItems = ["A Alarm", "C Alarm", "Pager", "Hymne", "Random"]; //new Array(25).fill("").map((_, i) => i.toString(7)) //
         const menuItemCount = menuItems.length;
-        const menuItemsPerCol = 2;
+        const maxDisplayedItems = 2;
         const selectedBitmap = shield;
         const unselectedBitmap = bigCross;
-        function render() {
+        function render(timestamp) {
           gfx.fillRect(0, 0, gfx.width, gfx.height, AdafruitGFX.BLACK);
-
-          for (let i = 0; i < menuItemCount; i++) {
-            const x =
-              2 +
-              Math.floor(i / menuItemsPerCol) *
-                Math.floor(
-                  gfx.width / Math.ceil(menuItemCount / menuItemsPerCol),
-                );
+          let offset = maxDisplayedItems * Math.floor(selected / maxDisplayedItems)
+          for (let i = 0; i < maxDisplayedItems; i++) {
+            const offsetIndex = offset + i
+            if (offsetIndex == menuItemCount) {
+              break
+            }
+            const x = 2;
             const y =
-              (i % menuItemsPerCol) * Math.floor(gfx.height / menuItemsPerCol) +
+              i * Math.floor(gfx.height / maxDisplayedItems) +
               1;
-            const bitmap = i === selected ? selectedBitmap : unselectedBitmap;
+            const bitmap = offsetIndex === selected ? selectedBitmap : unselectedBitmap;
             gfx.drawBitmap(
               x,
               y,
@@ -773,16 +777,34 @@
             gfx.drawChar(
               x + bitmap.width + 2,
               y - 2,
-              menuItems[i],
+              menuItems[offsetIndex],
               gfx.WHITE,
               undefined,
-              Math.floor(gfx.height / menuItemsPerCol) + 5,
+              Math.floor(gfx.height / maxDisplayedItems) + 5,
             );
+          }
+          function animateArrow(timestamp, x, y, amplitude, flipY) {
+            const arrowY = y - amplitude * (Math.sin(timestamp) - 1);
+            const arrowX = x
+            const data = [...arrow.data]
+            if (flipY) {
+              data.reverse()
+            }
+            gfx.drawBitmap(arrowX, arrowY, data, arrow.width, arrow.height, gfx.WHITE)
+          }
+          const arrowAmplitude = 3
+          const period = 50 * 2 * Math.PI
+          const arrowTime = timestamp / period;
+          if (offset + maxDisplayedItems < menuItemCount) {
+            animateArrow(arrowTime, gfx.width - arrow.width - 1, gfx.height - arrow.height - arrowAmplitude * 2, arrowAmplitude, false)
+          }
+          if (offset >= maxDisplayedItems) {
+            animateArrow(arrowTime + Math.PI, gfx.width - arrow.width - 1, 1, arrowAmplitude, true)
           }
         }
 
-        gfx.startAnimation(() => {
-          render();
+        gfx.startAnimation((timestamp) => {
+          render(timestamp);
         });
 
         render();
@@ -794,12 +816,6 @@
               break;
             case "ArrowUp":
               offset = menuItemCount - 1;
-              break;
-            case "ArrowLeft":
-              offset = menuItemCount - menuItemsPerCol;
-              break;
-            case "ArrowRight":
-              offset = menuItemsPerCol;
               break;
             default:
               return;
